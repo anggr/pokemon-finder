@@ -26,7 +26,6 @@ const App: React.FC = () => {
   >([]);
   const [error, setError] = React.useState<string | null>(null);
 
- 
   React.useEffect(() => {
     const fetchAllPokemon = async () => {
       try {
@@ -44,7 +43,6 @@ const App: React.FC = () => {
 
     fetchAllPokemon();
   }, []);
-
 
   const fetchPokemonData = async (input: string) => {
     if (!input.trim()) {
