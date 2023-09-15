@@ -2,26 +2,58 @@ import React from "react";
 import SearchBar from "./components/SearchBar";
 import PokemonDetails from "./components/PokemonDetails";
 
+type PokemonListResult = {
+  name: string;
+  url: string;
+};
+
 const App: React.FC = () => {
-  const [pokemonData, setPokemonData] = React.useState<{
-    id: number;
-    name: string;
-  } | null>(null);
+  const [allPokemon, setAllPokemon] = React.useState<string[]>([]);
+  const [matchingPokemon, setMatchingPokemon] = React.useState<
+    { id: number; name: string }[]
+  >([]);
   const [error, setError] = React.useState<string | null>(null);
 
-  const fetchPokemonData = async (name: string) => {
-    try {
-      const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${name}`);
-      if (response.ok) {
+  React.useEffect(() => {
+    const fetchAllPokemon = async () => {
+      try {
+        const response = await fetch(
+          "https://pokeapi.co/api/v2/pokemon?limit=1000"
+        );
         const data = await response.json();
-        setPokemonData({ id: data.id, name: data.name });
-        setError(null);
-      } else {
-        throw new Error("Pokemon not found");
+        setAllPokemon(
+          data.results.map((pokemon: PokemonListResult) => pokemon.name)
+        );
+      } catch (error) {
+        console.error("Failed to fetch all Pokémon:", error);
       }
+    };
+
+    fetchAllPokemon();
+  }, []);
+
+  const fetchPokemonData = async (input: string) => {
+    const filteredNames = allPokemon.filter((name) =>
+      name.includes(input.toLowerCase())
+    );
+
+    const pokemonDetailsPromises = filteredNames.map((name) =>
+      fetch(`https://pokeapi.co/api/v2/pokemon/${name}`).then((res) =>
+        res.json()
+      )
+    );
+
+    try {
+      const pokemonDetails = await Promise.all(pokemonDetailsPromises);
+      setMatchingPokemon(
+        pokemonDetails.map((pokemon) => ({
+          id: pokemon.id,
+          name: pokemon.name,
+        }))
+      );
+      setError(null);
     } catch (error) {
-      setPokemonData(null);
-      setError((error as Error).message);
+      setError("Error fetching data");
     }
   };
 
@@ -30,9 +62,9 @@ const App: React.FC = () => {
       <h1 className="text-3xl mb-4">Pokemon Finder</h1>
       <SearchBar onSearch={fetchPokemonData} />
       {error && <div className="mt-4 text-red-500">{error}</div>}
-      {pokemonData && !error && (
-        <PokemonDetails id={pokemonData.id} name={pokemonData.name} />
-      )}
+      {matchingPokemon.map((pokemon) => (
+        <PokemonDetails key={pokemon.id} id={pokemon.id} name={pokemon.name} />
+      ))}
     </div>
   );
 };
