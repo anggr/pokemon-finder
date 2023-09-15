@@ -20,12 +20,15 @@ const App: React.FC = () => {
         const response = await fetch(
           "https://pokeapi.co/api/v2/pokemon?limit=1000"
         );
+        if (!response.ok) {
+          throw new Error("Failed to fetch Pokémon list");
+        }
         const data = await response.json();
         setAllPokemon(
           data.results.map((pokemon: PokemonListResult) => pokemon.name)
         );
       } catch (error) {
-        console.error("Failed to fetch all Pokémon:", error);
+        setError("Failed to load Pokémon list.");
       }
     };
 
@@ -36,6 +39,12 @@ const App: React.FC = () => {
     const filteredNames = allPokemon.filter((name) =>
       name.includes(input.toLowerCase())
     );
+
+    if (!filteredNames.length) {
+      setError("No Pokémon found matching your query.");
+      setMatchingPokemon([]);
+      return;
+    }
 
     const pokemonDetailsPromises = filteredNames.map((name) =>
       fetch(`https://pokeapi.co/api/v2/pokemon/${name}`).then((res) =>
@@ -53,7 +62,7 @@ const App: React.FC = () => {
       );
       setError(null);
     } catch (error) {
-      setError("Error fetching data");
+      setError("Error fetching Pokémon details.");
     }
   };
 
