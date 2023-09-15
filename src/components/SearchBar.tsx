@@ -1,11 +1,11 @@
-import React from 'react';
+import React from "react";
 
 interface Props {
   onSearch: (name: string) => void;
 }
 
 const SearchBar: React.FC<Props> = ({ onSearch }) => {
-  const [inputValue, setInputValue] = React.useState('');
+  const [inputValue, setInputValue] = React.useState("");
 
   const handleSearch = () => {
     onSearch(inputValue);
@@ -20,7 +20,9 @@ const SearchBar: React.FC<Props> = ({ onSearch }) => {
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
       />
-      <button className="ml-2 p-2 bg-blue-500 text-white rounded" onClick={handleSearch}>
+      <button
+        className="ml-2 p-2 bg-blue-500 text-white rounded"
+        onClick={handleSearch}>
         Search
       </button>
     </div>
