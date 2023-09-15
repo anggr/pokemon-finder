@@ -36,6 +36,13 @@ const App: React.FC = () => {
   }, []);
 
   const fetchPokemonData = async (input: string) => {
+    if (!input.trim()) {
+      // Check if the input is empty or just whitespace
+      setError("Please input a Pokémon name first.");
+      setMatchingPokemon([]);
+      return;
+    }
+
     const filteredNames = allPokemon.filter((name) =>
       name.includes(input.toLowerCase())
     );
